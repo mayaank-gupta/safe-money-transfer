@@ -5,11 +5,13 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mayaank-gupta/century-pay-assignment/pkg/bank"
+	"github.com/mayaank-gupta/century-pay-assignment/pkg/shared"
 )
 
 func main() {
 	log.Println("Starting the bank server...")
-	bank := NewBank()
+	bank := bank.NewBank()
 
 	bank.CreateAccount("Mark", 100.00)
 	bank.CreateAccount("Jane", 50.00)
@@ -19,7 +21,7 @@ func main() {
 
 	r := gin.Default()
 	r.POST("/transfer", func(c *gin.Context) {
-		var req TransferRequest
+		var req shared.TransferRequest
 		if err := c.ShouldBindJSON(&req); err != nil {
 			log.Printf("Invalid request: %v", err)
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request"})

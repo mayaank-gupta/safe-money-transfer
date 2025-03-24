@@ -1,4 +1,4 @@
-package main
+package bank
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/gin-gonic/gin"
+	"github.com/mayaank-gupta/century-pay-assignment/pkg/shared"
 )
 
 func NewBank() *Bank {
@@ -25,12 +26,13 @@ func NewBank() *Bank {
 	}
 }
 
-func (b *Bank) CreateAccount(name string, balance float64) {
+func (b *Bank) CreateAccount(name string, balance float64) int {
 	b.mu.Lock()
 	defer b.mu.Unlock()
 	generatedAccountId := b.generateID()
 	b.Accounts[generatedAccountId] = &Account{Name: name, Balance: balance}
 	log.Printf("Created account %d with balance %f", generatedAccountId, balance)
+	return generatedAccountId
 }
 
 func (b *Bank) Transfer(fromId, toId int, amount float64) error {
@@ -77,7 +79,7 @@ func AccountIdCounter() func() int {
 }
 
 func (b *Bank) TransferHandler(c *gin.Context) {
-	var req TransferRequest
+	var req shared.TransferRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.AbortWithStatusJSON(400, gin.H{"error": "invalid request"})
 		return
