@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/gin-gonic/gin"
@@ -29,9 +30,15 @@ func (b *Bank) CreateAccount(name string, balance float64) {
 	defer b.mu.Unlock()
 	generatedAccountId := b.generateID()
 	b.Accounts[generatedAccountId] = &Account{Name: name, Balance: balance}
+	log.Printf("Created account %d with balance %f", generatedAccountId, balance)
 }
 
 func (b *Bank) Transfer(fromId, toId int, amount float64) error {
+
+	if fromId == toId {
+		log.Printf("Transfer failed: Source and destination accounts are the same (%d)", fromId)
+		return fmt.Errorf("cannot transfer to the same account")
+	}
 
 	b.mu.Lock()
 	fromAcc, fromExists := b.Accounts[fromId]
@@ -39,6 +46,7 @@ func (b *Bank) Transfer(fromId, toId int, amount float64) error {
 	b.mu.Unlock()
 
 	if !fromExists || !toExists {
+		log.Printf("Transfer failed: Account %d or %d does not exist", fromId, toId)
 		return fmt.Errorf("one or both accounts do not exist")
 	}
 
@@ -46,6 +54,7 @@ func (b *Bank) Transfer(fromId, toId int, amount float64) error {
 	defer fromAcc.mu.Unlock()
 
 	if fromAcc.Balance < amount {
+		log.Printf("Transfer failed: Insufficient funds in account %d", fromId)
 		return fmt.Errorf("insufficient funds")
 	}
 
@@ -54,6 +63,7 @@ func (b *Bank) Transfer(fromId, toId int, amount float64) error {
 
 	fromAcc.Balance -= amount
 	toAcc.Balance += amount
+	log.Printf("Transfer successful: %d -> %d (Amount: %.2f)", fromId, toId, amount)
 	return nil
 }
 
