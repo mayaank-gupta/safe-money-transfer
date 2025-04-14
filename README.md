@@ -1,4 +1,4 @@
-# 🚀 Century Pay Assignment
+# 🚀 Thread Safe Payment Transfer
 
 A simple concurrent money transfer system built with **Go** and **Gin**.
 
